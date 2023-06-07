@@ -30,10 +30,11 @@ struct Home: View {
     @State var color : Color = .black
     @State var type : PKInkingTool.InkType = .pencil
     @State var colorPicker = false
+    @State var toolPicker = PKToolPicker()
     
     var body: some View{
         NavigationView{
-            DrawingView(canvas: $canvas, isDraw: $isDraw, type: $type, color: $color)
+            DrawingView(canvas: $canvas, isDraw: $isDraw, type: $type, color: $color, toolPicker: $toolPicker)
                 .navigationTitle("Drawing")
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarItems(leading: Button(action: {
@@ -51,55 +52,55 @@ struct Home: View {
                             .font(.title)
                     }
                     //menu for inktype and color
-                    Menu {
-                        //color picker
-                        Button(action:{
-                            colorPicker.toggle()
-                        }){
-                            Label {
-                                Text("Color")
-                            } icon: {
-                                Image(systemName: "eyedropper.full")
-                            }
-                        }
-                        
-                        Button(action: {
-                            isDraw = true
-                            type = .pencil
-                        }){
-                            Label {
-                                Text("Pencil")
-                            } icon: {
-                                Image(systemName: "pencil")
-                            }
-                        }
-                        
-                        Button(action: {
-                            isDraw = true
-                            type = .pen
-                        }){
-                            Label {
-                                Text("Pen")
-                            } icon: {
-                                Image(systemName: "pencil.tip")
-                            }
-                        }
-                        
-                        Button(action: {
-                            isDraw = true
-                            type = .marker
-                        }){
-                            Label {
-                                Text("Marker")
-                            } icon: {
-                                Image(systemName: "highlighter")
-                            }
-                        }
-                        
-                    }label: {
-                        Image(systemName: "circle.hexagonpath")
-                            .font(.title)
-                    }
+//                    Menu {
+//                        //color picker
+//                        Button(action:{
+//                            colorPicker.toggle()
+//                        }){
+//                            Label {
+//                                Text("Color")
+//                            } icon: {
+//                                Image(systemName: "eyedropper.full")
+//                            }
+//                        }
+//
+//                        Button(action: {
+//                            isDraw = true
+//                            type = .pencil
+//                        }){
+//                            Label {
+//                                Text("Pencil")
+//                            } icon: {
+//                                Image(systemName: "pencil")
+//                            }
+//                        }
+//
+//                        Button(action: {
+//                            isDraw = true
+//                            type = .pen
+//                        }){
+//                            Label {
+//                                Text("Pen")
+//                            } icon: {
+//                                Image(systemName: "pencil.tip")
+//                            }
+//                        }
+//
+//                        Button(action: {
+//                            isDraw = true
+//                            type = .marker
+//                        }){
+//                            Label {
+//                                Text("Marker")
+//                            } icon: {
+//                                Image(systemName: "highlighter")
+//                            }
+//                        }
+//
+//                    }label: {
+//                        Image(systemName: "circle.hexagonpath")
+//                            .font(.title)
+//                    }
                     
                 })
                 .sheet(isPresented: $colorPicker) {
@@ -124,6 +125,7 @@ struct DrawingView: UIViewRepresentable{
     @Binding var isDraw : Bool
     @Binding var type : PKInkingTool.InkType
     @Binding var color : Color
+    @Binding var toolPicker: PKToolPicker
     
     var ink: PKInkingTool{
         PKInkingTool(type, color: UIColor(color))
@@ -138,6 +140,9 @@ struct DrawingView: UIViewRepresentable{
     
     func updateUIView(_ uiView: PKCanvasView, context: Context) {
         //updating tool when ever main view updates
+        toolPicker.setVisible(true, forFirstResponder: canvas)
+        toolPicker.addObserver(canvas)
+        canvas.becomeFirstResponder()
         uiView.tool = isDraw ? ink : eraser
         
     }
